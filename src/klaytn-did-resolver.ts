@@ -1,5 +1,5 @@
 import { DIDDocument, DIDResolver, ServiceEndpoint, VerificationMethod } from 'did-resolver';
-import Caver from 'caver-js';
+import Caver, { AccountKeyForRPC, PublicKeyForRPC, WeightedMultiSigKeyForRPC } from 'caver-js';
 
 export interface KlaytnDIDResolverOptions {
   rpcUrl: string;
@@ -25,7 +25,11 @@ export class KlaytnDIDResolver {
       throw new Error(`Invalid Klaytn DID: ${did}`);
     }
 
-    const address = didParts[3];
+		 const address = didParts[3];
+
+		if (await this.isDeactivated(address)) {
+      return null; // Return null if the DID is deactivated
+    }
 
     if (!this.caver.utils.isAddress(address)) {
       throw new Error(`Invalid Klaytn address: ${address}`);
@@ -54,13 +58,37 @@ export class KlaytnDIDResolver {
     return didDocument;
   }
 
-  private async getPublicKeyForAddress(address: string): Promise<string | null> {
+
+	private async getPublicKeyForAddress(address: string): Promise<string | null> {
     const account = await this.caver.rpc.klay.getAccount(address);
     if (!account) {
-      return null;
+        return null;
     }
 
-    const publicKey = this.caver.utils.xyPointFromPublicKey(account.key.publicKey);
+    // Check if the account key is of type AccountKeyPublic
+    if (account.accType !== 2) {
+        return null;
+    }
+
+    // Extract the public key from the AccountKeyPublic object
+    const publicKeyForRPC = account.account.key as PublicKeyForRPC;
+    const publicKey = publicKeyForRPC.x + publicKeyForRPC.y;
     return publicKey;
+}
+
+	
+
+	private async isDeactivated(address: string): Promise<boolean> {
+    // Replace the following line with the actual call to the smart contract
+    const deactivated = await this.caver.rpc.klay.call({
+      to: 'KlaytnDIDRegistryAddress', // Replace this with the actual contract address
+      data: this.caver.abi.encodeFunctionCall({
+        name: 'isDeactivated',
+        type: 'function',
+        inputs: [{ type: 'address', name: 'didAddress' }],
+      }, [address]),
+    });
+
+    return this.caver.abi.decodeParameter('bool', deactivated);
   }
 }
