@@ -1,0 +1,12 @@
+{
+  "name": "klaytn-did-resolver",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/yhc125/klaytn-did-resolver.git",
+  "author": "yhc125 <yhc125r@naver.com>",
+  "license": "MIT",
+  "dependencies": {
+    "caver-js": "^1.10.2",
+    "did-resolver": "^4.1.0"
+  }
+}
