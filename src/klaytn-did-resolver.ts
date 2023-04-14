@@ -3,6 +3,7 @@ import Caver from 'caver-js';
 
 export interface KlaytnDIDResolverOptions {
   rpcUrl: string;
+	network: 'baobab' | 'cypress';
 }
 
 export function getResolver(options: KlaytnDIDResolverOptions): Record<string, DIDResolver> {
@@ -10,8 +11,9 @@ export function getResolver(options: KlaytnDIDResolverOptions): Record<string, D
   return { klaytn: resolver.resolve.bind(resolver) };
 }
 
-class KlaytnDIDResolver {
+export class KlaytnDIDResolver {
   private caver: Caver;
+	private network: 'baobab' | 'cypress';
 
   constructor(options: KlaytnDIDResolverOptions) {
     this.caver = new Caver(options.rpcUrl);
@@ -19,11 +21,11 @@ class KlaytnDIDResolver {
 
   async resolve(did: string): Promise<DIDDocument | null> {
     const didParts = did.split(':');
-    if (didParts.length !== 3 || didParts[0] !== 'did' || didParts[1] !== 'klaytn') {
+		if (didParts.length !== 4 || didParts[0] !== 'did' || didParts[1] !== 'klaytn' || didParts[2] !== this.network) {
       throw new Error(`Invalid Klaytn DID: ${did}`);
     }
 
-    const address = didParts[2];
+    const address = didParts[3];
 
     if (!this.caver.utils.isAddress(address)) {
       throw new Error(`Invalid Klaytn address: ${address}`);
