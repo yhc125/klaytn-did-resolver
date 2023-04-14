@@ -1,5 +1,5 @@
 import { DIDDocument, DIDResolver, ServiceEndpoint, VerificationMethod } from 'did-resolver';
-import Caver, { AccountKeyForRPC, PublicKeyForRPC, WeightedMultiSigKeyForRPC } from 'caver-js';
+import Caver, { PublicKeyForRPC } from 'caver-js';
 
 export interface KlaytnDIDResolverOptions {
   rpcUrl: string;
@@ -74,9 +74,8 @@ export class KlaytnDIDResolver {
     const publicKeyForRPC = account.account.key as PublicKeyForRPC;
     const publicKey = publicKeyForRPC.x + publicKeyForRPC.y;
     return publicKey;
-}
+	}
 
-	
 
 	private async isDeactivated(address: string): Promise<boolean> {
     // Replace the following line with the actual call to the smart contract

@@ -1,5 +1,5 @@
 import { DIDResolutionResult, Resolver } from 'did-resolver';
-import { getResolver as getKlaytnDIDResolver } from './klaytn-did-resolver';
+import { getResolver as getKlaytnDIDResolver } from '../klaytn-did-resolver';
 
 describe('klaytn-did-resolver', () => {
   const baobabConfig = {
