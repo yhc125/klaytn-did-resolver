@@ -1,6 +1,6 @@
 {
   "name": "klaytn-did-resolver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "repository": "https://github.com/yhc125/klaytn-did-resolver.git",
   "author": "yhc125 <yhc125r@naver.com>",
