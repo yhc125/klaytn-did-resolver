@@ -1,4 +1,4 @@
-import { DIDDocument, DIDResolver, ServiceEndpoint, VerificationMethod } from 'did-resolver';
+import { DIDDocument, DIDResolutionResult, DIDResolver, ServiceEndpoint, VerificationMethod } from 'did-resolver';
 import Caver, { PublicKeyForRPC } from 'caver-js';
 
 export interface KlaytnDIDResolverOptions {
@@ -17,51 +17,64 @@ export class KlaytnDIDResolver {
 
   constructor(options: KlaytnDIDResolverOptions) {
     this.caver = new Caver(options.rpcUrl);
+		this.network = options.network;
   }
 
-  async resolve(did: string): Promise<DIDDocument | null> {
-    const didParts = did.split(':');
+	async resolve(did: string): Promise<DIDResolutionResult> {
+		const didParts = did.split(':');
 		if (didParts.length !== 4 || didParts[0] !== 'did' || didParts[1] !== 'klaytn' || didParts[2] !== this.network) {
-      throw new Error(`Invalid Klaytn DID: ${did}`);
-    }
-
-		 const address = didParts[3];
-
-		if (await this.isDeactivated(address)) {
-      return null; // Return null if the DID is deactivated
-    }
-
-    if (!this.caver.utils.isAddress(address)) {
-      throw new Error(`Invalid Klaytn address: ${address}`);
-    }
-
-    const publicKey = await this.getPublicKeyForAddress(address);
-    if (!publicKey) {
-      return null;
-    }
-
-    const didDocument: DIDDocument = {
-      '@context': 'https://www.w3.org/ns/did/v1',
-      id: did,
-      verificationMethod: [
-        {
-          id: `${did}#controller`,
-          type: 'EcdsaSecp256k1VerificationKey2019',
-          controller: did,
-          publicKeyHex: publicKey,
-        },
-      ],
-      authentication: [`${did}#controller`],
-      // service: [], // Add service endpoints if necessary
-    };
-
-    return didDocument;
-  }
-
+			throw new Error(`Invalid Klaytn DID: ${did}`);
+		}
+	
+		const address = didParts[3];
+	
+		const isDeactivated = await this.isDeactivated(address);
+		
+		if (!this.caver.utils.isAddress(address)) {
+			throw new Error(`Invalid Klaytn address: ${address}`);
+		}
+	
+		const publicKey = await this.getPublicKeyForAddress(address);
+		if (!publicKey) {
+			return {
+				didResolutionMetadata: {
+					error: 'invalidDid',
+				},
+				didDocument: null,
+				didDocumentMetadata: {},
+			};
+		}
+	
+		const didDocument: DIDDocument = {
+			'@context': 'https://www.w3.org/ns/did/v1',
+			id: did,
+			verificationMethod: [
+				{
+					id: `${did}#controller`,
+					type: 'EcdsaSecp256k1VerificationKey2019',
+					controller: did,
+					publicKeyHex: publicKey,
+				},
+			],
+			authentication: [`${did}#controller`],
+			// service: [], // Add service endpoints if necessary
+		};
+	
+		const didResolutionResult: DIDResolutionResult = {
+			didResolutionMetadata: {
+				contentType: 'application/did+ld+json',
+			},
+			didDocument: isDeactivated ? null : didDocument,
+			didDocumentMetadata: isDeactivated ? { deactivated: true } : {},
+		};
+	
+		return didResolutionResult;
+	}
+	
 
 	private async getPublicKeyForAddress(address: string): Promise<string | null> {
-    const account = await this.caver.rpc.klay.getAccount(address);
-    if (!account) {
+    const account = await this.caver.klay.getAccount(address);
+		if (!account) {
         return null;
     }
 
@@ -80,7 +93,7 @@ export class KlaytnDIDResolver {
 	private async isDeactivated(address: string): Promise<boolean> {
     // Replace the following line with the actual call to the smart contract
     const deactivated = await this.caver.rpc.klay.call({
-      to: 'KlaytnDIDRegistryAddress', // Replace this with the actual contract address
+      to: '0x88924D3A8259780E1E1EB3838813E9f3a0651403', // KlaytnDIDRegistryAddress
       data: this.caver.abi.encodeFunctionCall({
         name: 'isDeactivated',
         type: 'function',
@@ -88,6 +101,8 @@ export class KlaytnDIDResolver {
       }, [address]),
     });
 
-    return this.caver.abi.decodeParameter('bool', deactivated);
+		const result = this.caver.abi.decodeParameter('bool', deactivated);
+
+    return JSON.parse(result);
   }
 }
