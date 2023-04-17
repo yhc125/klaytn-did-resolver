@@ -35,6 +35,7 @@ export class KlaytnDIDResolver {
 		}
 	
 		const publicKey = await this.getPublicKeyForAddress(address);
+		console.log(publicKey)
 		if (!publicKey) {
 			return {
 				didResolutionMetadata: {
@@ -74,17 +75,18 @@ export class KlaytnDIDResolver {
 
 	private async getPublicKeyForAddress(address: string): Promise<string | null> {
     const account = await this.caver.klay.getAccount(address);
+		console.log(account)
 		if (!account) {
         return null;
     }
 
     // Check if the account key is of type AccountKeyPublic
-    if (account.accType !== 2) {
+    if (account.account.key.keyType !== 2) {
         return null;
     }
 
     // Extract the public key from the AccountKeyPublic object
-    const publicKeyForRPC = account.account.key as PublicKeyForRPC;
+    const publicKeyForRPC = account.account.key.key as PublicKeyForRPC;
     const publicKey = publicKeyForRPC.x + publicKeyForRPC.y;
     return publicKey;
 	}
@@ -93,7 +95,7 @@ export class KlaytnDIDResolver {
 	private async isDeactivated(address: string): Promise<boolean> {
     // Replace the following line with the actual call to the smart contract
     const deactivated = await this.caver.rpc.klay.call({
-      to: '0x88924D3A8259780E1E1EB3838813E9f3a0651403', // KlaytnDIDRegistryAddress
+      to: '0xf7C4A040d44cA56C3cc8FAAA3A801b89DD936671', // KlaytnDIDRegistryAddress
       data: this.caver.abi.encodeFunctionCall({
         name: 'isDeactivated',
         type: 'function',

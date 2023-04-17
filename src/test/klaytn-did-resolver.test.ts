@@ -3,6 +3,7 @@ import { getResolver as getKlaytnDIDResolver, KlaytnDIDResolverOptions } from '.
 
 describe('klaytn-did-resolver', () => {
 
+
 	let baobabDidResolver: Resolver;
   let cypressDidResolver: Resolver;
 	
@@ -26,7 +27,7 @@ describe('klaytn-did-resolver', () => {
 
   describe('Baobab network', () => {
     it('resolves DID document', async () => {
-      const did = 'did:klaytn:baobab:0xA57d85F38d6Ef66aBBb3088A32532Ea6884FF6C3';
+      const did = 'did:klaytn:baobab:0xA738931B9Dd4019D282D9cf368644fEc52e9ec58';
       const didResolveRes: DIDResolutionResult = await baobabDidResolver.resolve(did);
 
       console.log(JSON.stringify(didResolveRes, null, 3));
