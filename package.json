@@ -9,6 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@taquito/taquito": "^16.1.2",
     "caver-js": "^1.10.2",
     "did-resolver": "^4.1.0"
   },
