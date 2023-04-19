@@ -11,13 +11,11 @@ describe('klaytn-did-resolver', () => {
     const baobabConfig: KlaytnDIDResolverOptions = {
       rpcUrl: 'https://api.baobab.klaytn.net:8651',
       network: 'baobab',
-			contractAddress: '0xf7C4A040d44cA56C3cc8FAAA3A801b89DD936671',
     };
 
     const cypressConfig: KlaytnDIDResolverOptions = {
       rpcUrl: 'https://api.cypress.klaytn.net:8651',
       network: 'cypress',
-			contractAddress: '',
     };
 
     const baobabDIDResolver = getKlaytnDIDResolver(baobabConfig);
