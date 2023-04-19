@@ -4,6 +4,7 @@ import Caver, { PublicKeyForRPC } from 'caver-js';
 export interface KlaytnDIDResolverOptions {
   rpcUrl: string;
 	network: 'baobab' | 'cypress';
+	contractAddress: string;
 }
 
 export function getResolver(options: KlaytnDIDResolverOptions): Record<string, DIDResolver> {
@@ -14,10 +15,12 @@ export function getResolver(options: KlaytnDIDResolverOptions): Record<string, D
 export class KlaytnDIDResolver {
   private caver: Caver;
 	private network: 'baobab' | 'cypress';
+	private contractAddress: string;
 
   constructor(options: KlaytnDIDResolverOptions) {
     this.caver = new Caver(options.rpcUrl);
 		this.network = options.network;
+		this.contractAddress = options.contractAddress;
   }
 
 	async resolve(did: string): Promise<DIDResolutionResult> {
@@ -95,7 +98,7 @@ export class KlaytnDIDResolver {
 	private async isDeactivated(address: string): Promise<boolean> {
     // Replace the following line with the actual call to the smart contract
     const deactivated = await this.caver.rpc.klay.call({
-      to: '0xf7C4A040d44cA56C3cc8FAAA3A801b89DD936671', // KlaytnDIDRegistryAddress
+      to: this.contractAddress, // KlaytnDIDRegistryAddress '0xf7C4A040d44cA56C3cc8FAAA3A801b89DD936671'
       data: this.caver.abi.encodeFunctionCall({
         name: 'isDeactivated',
         type: 'function',
